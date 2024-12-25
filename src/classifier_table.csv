@@ -61,9 +61,11 @@ Z,letter
 7,digit
 8,digit
 9,digit
+-,hyphen
+_,underscore
 <,openB
 >,closeB
 \,bSlash
 /,fSlash
-\n, newline
- , space
+\n,newline
+ ,space
