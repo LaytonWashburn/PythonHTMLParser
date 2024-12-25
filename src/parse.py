@@ -1,36 +1,9 @@
-# Algorithm
-'''
-        state = "s0"
-        lexeme = " "
-        # clear stack;
-        # push(bad)
-
-        # while(state not equal to error state (s_e))
-        # NextChar(Char);
-        # lexeme <- lexeme + char
-
-        # if state in accept State (S_A)
-            # then clear stack;
-        # push(state);
-
-        # cat <- CharCat[char];
-        # state <- S[state.cat];
-
-        # end
-
-        # while(state not in Accept state (S_A) and state not equal-to bad) do
-        # state <- pop()
-        # truncate lexeme;
-        # Rollback();
-        # end
-
-        # if state in Accept state (S_A)
-        # then return Type[state];
-        # else return invalid
-'''
-
-import tokens as T
+import tokens
 import tables
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO) # Change this to INFO to not have the debug and DEBUG for debugging
 
 class StreamReader:
     def __init__(self, data:str):
@@ -61,7 +34,7 @@ class Parser:
         self.classifier_table = tables.ClassifierTable('src/classifier_table.csv')
         self.transition_table = tables.Transitiontable('src/transition_table.csv')
         self.token_type_table = tables.TokenTypeTable('src/token_type_table.csv')
-        self.dom = T.DOM()
+        self.dom = None
         self.stream_reader = StreamReader(self.html)
     
 
@@ -74,38 +47,38 @@ class Parser:
 
         while current != "END":
 
-            # print("=============== STARTING INTERATION ===============")
-            # print(f"Current character: {current}")
-            # print(f"Current state: {state}")
-            # print(f"Current lexeme: {lexeme}")
+            logging.debug("=============== STARTING INTERATION ===============")
+            logging.debug(f"Current character: {current}")
+            logging.debug(f"Current state: {state}")
+            logging.debug(f"Current lexeme: {lexeme}")
                 
-
             token_type = self.token_type_table.getTokenType(state=state)
 
-            if token_type is not None:
+            if token_type is not None: # If the state is an accept state
 
                 if token_type == "ATTRIBUTE":
-                    # print(f"Token Type: Attribute")
-                    lexeme, old_char = self.stream_reader.truncate(lexeme)
-                    # print(f"Lexeme is: {lexeme}")
-                    # print(f"Old char: {old_char}")
-                    # print(f"The old index is: {self.stream_reader.index}")
-                    self.stream_reader.rollback()
-                    # print(f"The new index is: {self.stream_reader.index}")
+                    logging.debug(f"Token Type: Attribute")
+                    lexeme, old_char = self.stream_reader.truncate(lexeme) # Remove the last character and return new lexeme and removed character
+                    logging.debug(f"Lexeme is: {lexeme}")
+                    logging.debug(f"Old char: {old_char}")
+                    logging.debug(f"The old index is: {self.stream_reader.index}")
+                    self.stream_reader.rollback() # Move the stream reader's index back one
+                    logging.debug(f"The new index is: {self.stream_reader.index}")
 
-                    self.tokens.append(T.Token(name=self.token_type_table.getTokenType(state=state), 
+                    self.tokens.append(tokens.Token(name=self.token_type_table.getTokenType(state=state), 
                                                 attribute_value=lexeme))
                     lexeme = ""
                     current = old_char
-                    # print(f"Setting current to: {current}")
+                    logging.debug(f"Setting current to: {current}")
 
                 elif current == None:
-                    self.tokens.append(T.Token(name=self.token_type_table.getTokenType(state=state), 
+                    self.tokens.append(tokens.Token(name=self.token_type_table.getTokenType(state=state), 
                                                attribute_value=lexeme))
                     current = "END"
-                    continue
+                    logging.debug("=============== ENDING INTERATION ===============")
+                    continue # This will force the loop to the top and check the condition and then quit
                 else:
-                    self.tokens.append(T.Token(name=self.token_type_table.getTokenType(state=state), 
+                    self.tokens.append(tokens.Token(name=self.token_type_table.getTokenType(state=state), 
                                                attribute_value=lexeme))
                     lexeme = ""
                     state = "START"
@@ -117,20 +90,20 @@ class Parser:
         
             current = self.stream_reader.next() # Get next character
 
-            # print(f"New character: {current}")
-            # print(f"New state: {state}")
-            # print(f"New lexeme: {lexeme}")
-            # print("=============== ENDING INTERATION ===============")
+            logging.debug(f"New character: {current}")
+            logging.debug(f"New state: {state}")
+            logging.debug(f"New lexeme: {lexeme}")
+            logging.debug("=============== ENDING INTERATION ===============")
 
-
-
-            
     def get_tokens(self) -> list:
         return self.tokens
 
-# Main Method for the Parser
+    # Main Method for the Parser
     def parse(self):
         self.build_token_list()
+        self.dom = tokens.DOM(self.tokens)
+        self.dom.build()
+        self.dom.get_dom()
     
     def clear_parser(self):
         self.tokens = []
