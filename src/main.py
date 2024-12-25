@@ -13,7 +13,6 @@ def main():
     with open('src/index.html', 'r', encoding='utf-8') as file:
         html = file.read()
   
-    
     parser = parse.Parser(html)
     parser.parse()
     tokens = parser.get_tokens()
