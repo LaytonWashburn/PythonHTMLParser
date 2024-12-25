@@ -1,5 +1,5 @@
-import tokens
-import tables
+import parser.tokens as tokens
+import parser.tables as tables
 import logging
 
 # Configure logging
@@ -29,11 +29,11 @@ class StreamReader:
 
 class Parser:
     def __init__(self, html: str):
-        self.html = html.replace("\n", "")#.replace(" ", "")
+        self.html = html.replace("\n", "")
         self.tokens = []
-        self.classifier_table = tables.ClassifierTable('src/classifier_table.csv')
-        self.transition_table = tables.Transitiontable('src/transition_table.csv')
-        self.token_type_table = tables.TokenTypeTable('src/token_type_table.csv')
+        self.classifier_table = tables.ClassifierTable('src/tables/classifier_table.csv')
+        self.transition_table = tables.Transitiontable('src/tables/transition_table.csv')
+        self.token_type_table = tables.TokenTypeTable('src/tables/token_type_table.csv')
         self.dom = None
         self.stream_reader = StreamReader(self.html)
     
