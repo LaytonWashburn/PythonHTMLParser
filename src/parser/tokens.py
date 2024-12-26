@@ -11,6 +11,9 @@ class Node:
         self.opening_tag = ""
         self.closing_tag = ""
         self.attribute = ""
+        self.styles = {}
+        self.id = ""
+        self._class = "" # Figure out a way to make this just class
         self.parent = None
         self.children = []
     

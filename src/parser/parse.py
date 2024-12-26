@@ -38,7 +38,7 @@ class Parser:
         self.stream_reader = StreamReader(self.html)
     
 
-
+    # Rollback on END_TAG_NAME, 
     def build_token_list(self):
 
         state = "START" # Set initial state to start

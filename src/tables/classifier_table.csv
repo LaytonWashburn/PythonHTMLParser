@@ -63,9 +63,12 @@ Z,letter
 9,digit
 -,hyphen
 _,underscore
-<,openB
->,closeB
-\,bSlash
-/,fSlash
+<,open_brace
+>,close_brace
+\,back_slash
+/,forward_slash
 \n,newline
  ,space
+=,equal
+\",double_quotation_mark
+',single_quotation_mark
