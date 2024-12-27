@@ -4,7 +4,8 @@ import parser.parse as parse
 def main():
 
     # Test 0
-    html = """<body><p>Test</p></body>"""
+    # html = """<body></body>"""
+    # # html = """<body>Test</body>"""
 
     # # Test 1
     # html = """<body>Test<p>Test2</p></body>"""
@@ -20,12 +21,15 @@ def main():
     # with open('src/index.html', 'r', encoding='utf-8') as file:
     #     html = file.read()
 
-    # # Test 4
-    # html = """<body>
-    #             <h1>Help</h1>
-    #             Test
-    #             <p>Test2</p>
-    #         </body>"""
+    # Test 4
+    html = """<body>
+                <h1>Help</h1>
+                Test
+                <p>Test2</p>
+            </body>"""
+
+    # # Test 5
+    # html = "Hello"
   
     parser = parse.Parser(html)
     parser.parse()
