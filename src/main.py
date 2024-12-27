@@ -21,16 +21,28 @@ def main():
     # with open('src/index.html', 'r', encoding='utf-8') as file:
     #     html = file.read()
 
-    # Test 4
-    html = """<body>
-                <h1>Help</h1>
-                Test
-                <p>Test2</p>
-            </body>"""
+    # # Test 4
+    # html = """<body>
+    #             <h1>Help</h1>
+    #             Test
+    #             <p>Test2</p>
+    #         </body>"""
 
-    # # Test 5
+    # # Test 5 --> This doesn't work right now
     # html = "Hello"
+
+    # # Test 6
+    # html = """<"""
+
+    # # Test 7
+    # html =""">"""
   
+    # # Test 8
+    # html =""""""
+    
+    # Test 9
+    html ="""<f><f<<<<"""
+
     parser = parse.Parser(html)
     parser.parse()
     parser.print_tokens()
