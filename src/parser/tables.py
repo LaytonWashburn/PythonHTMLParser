@@ -10,6 +10,7 @@ class ClassifierTable:
         df = pd.read_csv(file_path)
         my_dict = pd.Series(df['Classification'].values, index=df['Character']).to_dict()
         my_dict['\n'] = my_dict.pop('\\n')  
+        my_dict['\"'] = my_dict.pop('\\"')  
         return my_dict
     
     def getClassification(self, character: str):

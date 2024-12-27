@@ -88,6 +88,8 @@ class Parser:
             if self.token_type_table.getTokenType(state=state) == "END_STRING":
                 lexeme = self.stream_reader.truncate(lexeme)
                 self.stream_reader.rollback()
+                if current is not None or self.stream_reader.lookahead() is not None:
+                    self.stream_reader.set_eof(False)
             if self.token_type_table.getTokenType(state=state) == "OPEN_TAG" and current == "/":
                 lexeme += current
                 self.stream_reader.next() # Consume the "/"
@@ -97,6 +99,10 @@ class Parser:
         else:
             logging.debug("=============== Returning None Token ===============")
             return None
+
+        
+
+        
         
 
 
