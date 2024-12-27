@@ -8,7 +8,7 @@ START,hyphen,STRING
 START,underscore,STRING
 START,equal,STRING
 START,double_quotation_mark,STRING
-STRING,space,STRING
+STRING,space,END_STRING
 STRING,letter,STRING
 STRING,digit,STRING
 STRING,hyphen,STRING

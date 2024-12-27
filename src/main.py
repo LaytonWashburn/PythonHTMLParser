@@ -39,9 +39,12 @@ def main():
   
     # # Test 8
     # html =""""""
-    
-    # Test 9
-    html ="""<f><f<<<<"""
+
+    # # Test 9
+    # html ="""<f><f<<<<"""
+
+    # Test 10
+    html = """<body id="test"></body>"""
 
     parser = parse.Parser(html)
     parser.parse()
