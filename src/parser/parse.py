@@ -3,8 +3,6 @@ from parser.tables import ClassifierTable, Transitiontable, TokenTypeTable
 from parser.scan_stream import StreamReader
 import logging
 
-# Configure logging
-logging.basicConfig(level=logging.INFO) # Change this to INFO to not have the debug and DEBUG for debugging
 
 class Parser:
     def __init__(self, html: str):
@@ -100,13 +98,6 @@ class Parser:
             logging.debug("=============== Returning None Token ===============")
             return None
 
-        
-
-        
-        
-
-
-
     def get_tokens(self) -> list:
         return self.tokens
 
@@ -119,9 +110,6 @@ class Parser:
     # Main Method for the Parser
     def parse(self):
         self.build_token_list()
-        # self.dom = tokens.DOM(self.tokens)
-        # self.dom.build()
-        # self.dom.get_dom()
     
     def clear_parser(self):
         self.tokens = []
