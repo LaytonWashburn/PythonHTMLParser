@@ -1,5 +1,5 @@
-from dom.dom import DOM
-from parser.parse import Parser
+from parser.dom import DOM
+from lexer.lexer import Lexer
 from tests import Test
 import logging
 
@@ -15,16 +15,16 @@ def main():
     html = test.get_html()
 
     # Make a parser object and parse
-    parser = Parser(html)
-    parser.parse()
-    parser.print_tokens()
-    tokens = parser.get_tokens()
-
+    lexer = Lexer(html)
+    lexer.scan()
+    lexer.print_tokens()
+    tokens = lexer.get_tokens()
+    
     # Make a dom and construct it from tokens
     dom = DOM(tokens=tokens)
-    dom.build()
-    print("Hello")
-    # dom.get_dom()
+    # dom.build()
+    # print("Hello")
+    # # dom.get_dom()
 
 if __name__ == "__main__":
     main()
