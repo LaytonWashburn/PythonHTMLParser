@@ -5,8 +5,9 @@ class Test:
         pass
     
     def get_html(self):
-        # Test 0
-        # html = """<body></body>"""
+        # # Test 0
+        # html = "</body>"
+        # # html = """<body></body>"""
         # # html = """<body>Test</body>"""
 
         # # Test 1
@@ -23,7 +24,7 @@ class Test:
 
         # Test 3
         html = ""
-        with open('src/html/test2.html', 'r', encoding='utf-8') as file:
+        with open('src/html/index.html', 'r', encoding='utf-8') as file:
             html = file.read()
 
         # # Test 4

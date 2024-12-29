@@ -8,19 +8,20 @@ class DOM:
         self.tokens = tokens
         self.root = None
         self.current_node = None
+        self.metadata = []
 
     def add(self):
         pass
 
     # Private method to iterate through the tree
     def _recurse_tree(self, node:Node, dom:str, tabs:int):
-        with_children = '\n'+ (('   ' * tabs) + node.get_attribute() + '\n' if node.get_attribute() != "" else "")
-        dom = dom + node.get_opening_tab() + (with_children if len(node.children) != 0 else node.get_attribute())
+        with_children = '\n'+ (('   ' * tabs) + node.get_content() + '\n' if node.get_content() != "" else "")
+        dom = dom + node.get_start_tag() + (with_children if len(node.children) != 0 else node.get_content())
         tabs += 1
         for n in node.children:
             dom += ('   ' * tabs)
             dom = self._recurse_tree(node=n, dom = dom, tabs=tabs)
-        space = ('   ' * (tabs - 1)) + node.get_closing_tag() + ('\n' if node.get_parent() is not None else "") if len(node.children) != 0 else node.get_closing_tag() + ('\n' if node.get_parent() is not None else "")
+        space = ('   ' * (tabs - 1)) + node.get_start_tag() + ('\n' if node.get_parent() is not None else "") if len(node.children) != 0 else node.get_end_tag() + ('\n' if node.get_parent() is not None else "")
         dom = dom + space
         return dom
 
@@ -29,55 +30,50 @@ class DOM:
 
 
     def get_dom(self):
+        logging.debug("=============== Starting to Print DOM ===============")
         # logging.debug(self.root)
         dom = self.recurse_tree(dom="", tabs=0)
         #logging.debug(dom)
         print(dom)
+        logging.debug("=============== Finished Printing the DOM ===============")
+
 
     # Build the DOM by iterating through the tokens
     def build(self):
 
         logging.debug("=============== Starting to Build the Tree ===============")
-
         for token in self.tokens:
-            logging.debug(f"Current token: {token.get_name()} : {token.get_attribute()}")
-
-            tag_name = token.get_name()
-
-            if tag_name == "OPEN_TAG":
-
-                node = Node() # Make a node
-                
-                if self.root is None: # If there's no root node make the current node the root
-                    node.open_start_tag = token.get_attribute()
-                    self.root = node # Set current node to node
-                    self.current_node = self.root # Set current node to root
-
-                else: # If there's a root, make it 
-                    if self.current_node.close_end_tag is None: # If needs to be placed as a child
-                        self.current_node.add_child(node=node) # Add node as a child
-                        node.set_parent(self.current_node) # Connet node to
-                        self.current_node = node # Move current node to child
-                    else: # If needs to be placed as a sibling
-                        parent = self.current_node.get_parent()
-                        parent.add_child(node=node)
-
-            elif tag_name == "OPEN_END_TAG":
-                self.current_node.close_start_tag = token.get_attribute()
-
-            elif tag_name == "END_STRING":
-                self.current_node.set_attribute(token.get_attribute())
-                # if self.current_node.open_tag_name is not None:
-                #     pass
             
-            elif tag_name == "EQUAL":
-                pass
+            logging.debug(token.get_name())
+            logging.debug(token.get_attribute())
 
-            elif tag_name == "CLOSE_TAG":
-                self.current_node.set_closing_tag(token.get_attribute())
-                self.current_node.set_tag(self.current_node.attribute)
-                if self.current_node.parent is not None:
-                    self.current_node = self.current_node.parent
+            if token is None:
+                logging.debug("Token is None")
+                continue
+
+            if token.get_name() == "CONTENT":
+                self.current_node.set_content(token.get_attribute())
+            
+            elif token.get_name() == "CLOSE_END_TAG":
+                self.current_node.set_end_tag(token.get_attribute())
+                self.current_node = self.current_node.get_parent()
+
+            elif token.get_name() == "CLOSE_START_TAG":
+                node = Node()
+                node.set_start_tag(token.get_attribute())
+                if self.root is None :
+                    if token.get_attribute().startswith("<html"):
+                        self.current_node = node
+                        self.root = self.current_node
+                    else:
+                        node.set_start_tag(token.get_attribute())
+                        self.metadata.append(node)
+                else:
+                    node.set_parent(node=self.current_node)
+                    self.current_node.add_child(node=node)
+                    self.current_node = node
+
+
 
             else:
                 logging.debug("Tag not recognized")

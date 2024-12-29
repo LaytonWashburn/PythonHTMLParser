@@ -56,12 +56,13 @@ class Parser:
                 state = None # "error" # This might need to be none
                 curr = 0
         
-            if curr is not None:
-                lexeme += curr; # Append curr to the end of lexeme
+            if curr is not None: # Append curr to the end of lexeme
+                lexeme += curr; 
+            else:
+                lexeme += " " # End of File Space to be able to rollback
 
-            accept = self.token_type_table.getTokenType(state=state)
             # If an accept state clear stack
-            if accept is not None:
+            if self.token_type_table.getTokenType(state=state) is not None:
                 stack.clear()
             
 
@@ -71,10 +72,8 @@ class Parser:
             state = self.transition_table.getTransition(state=state, transition=cat) # Get the new State from the TransitionTable given the current state and cat
 
         # While not an accept state and state is not "bad"
-        accept = self.token_type_table.getTokenType(state=state) 
-        while accept is None and state != "bad":
+        while self.token_type_table.getTokenType(state=state) is None and state != "bad":
             state = stack.pop() # Pop the stack and set result as the new state
-            accept = self.token_type_table.getTokenType(state=state) 
 
         # Try to remove the last character from lexeme and rollback the ss iterator or throw an exception and continue
         try:
