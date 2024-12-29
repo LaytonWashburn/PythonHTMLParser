@@ -36,68 +36,63 @@ class Parser:
     """
     def next_token(self):
         logging.debug("=============== Getting Next Token ===============")
-        state = "START" # Set initial state to start
-        lexeme = "" # Set the lexeme to empty string
-        current = "" # Get the first character
-        category = ""
         stack = []
+        curr = 0
+        cat = None
+        state = "START"
+        lexeme = ""
 
+        # Clear stack and push "bad" to the stack
         stack.append("bad")
 
-        while state is not None:
+        # While not in the error state
+        while state != None: # state.compareTo("error") != 0){
             try:
-                current = self.stream_reader.next()
+                curr = self.stream_reader.next(); # This throws an eof error // Gets the next character
+                if curr is None:
+                    self.stream_reader.set_eof(True)
+                    
             except Exception as e:
-                state = None
-                current = ""
-                logging.error(f"Error Occurred: {e}")
-            if current is not None:
-                lexeme += current # Append current character to the lexeme
-            else:
-                self.stream_reader.set_eof(True)
-                break
-            if self.token_type_table.getTokenType(state=state) is not None:
+                state = None # "error" # This might need to be none
+                curr = 0
+        
+            if curr is not None:
+                lexeme += curr; # Append curr to the end of lexeme
+
+            accept = self.token_type_table.getTokenType(state=state)
+            # If an accept state clear stack
+            if accept is not None:
                 stack.clear()
             
-            stack.append(state) # Push current state onto stack
-            category = self.classifier_table.getClassification(character=current) #getCategory(curr); // Get the current character's Category
-            state = self.transition_table.getTransition(state=state, transition=category) # getNewState(state, cat); // Get the new State from the TransitionTable given the current state and cat
 
-        while self.token_type_table.getTokenType(state=state) is None and state != "bad":
-            if current is None and self.stream_reader.lookahead() is None:
-                self.stream_reader.set_eof(True)
-                if state == "STRING":
-                    state = "END_STRING"
-                    logging.debug("=============== Returning Token ===============")
-                    return Token(name=self.token_type_table.getTokenType(state=state), attribute_value=lexeme)
-                break
-            state = stack.pop()
-            try:
-                lexeme = self.stream_reader.truncate(lexeme)
-                self.stream_reader.rollback()
-                self.stream_reader.set_eof(False) # This might break it
-            except Exception as e:
-                logging.error(f"Error Occurred: {e}")
+            stack.append(state); # Push state onto stack
 
+            cat = self.classifier_table.getClassification(curr) # Get the current character's Category
+            state = self.transition_table.getTransition(state=state, transition=cat) # Get the new State from the TransitionTable given the current state and cat
+
+        # While not an accept state and state is not "bad"
+        accept = self.token_type_table.getTokenType(state=state) 
+        while accept is None and state != "bad":
+            state = stack.pop() # Pop the stack and set result as the new state
+            accept = self.token_type_table.getTokenType(state=state) 
+
+        # Try to remove the last character from lexeme and rollback the ss iterator or throw an exception and continue
+        try:
+            lexeme = self.stream_reader.truncate(string=lexeme)
+            self.stream_reader.rollback() 
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+        # If an accept state return a Token with the type and lexeme or return error
         if self.token_type_table.getTokenType(state=state) is not None and state != "bad":
-            if current is None and self.stream_reader.lookahead() is None:
-                self.stream_reader.set_eof(True)
             logging.debug("=============== Returning Token ===============")
-            if self.token_type_table.getTokenType(state=state) == "END_STRING":
-                lexeme = self.stream_reader.truncate(lexeme)
-                self.stream_reader.rollback()
-                if current is not None or self.stream_reader.lookahead() is not None:
-                    self.stream_reader.set_eof(False)
-            if self.token_type_table.getTokenType(state=state) == "OPEN_TAG" and current == "/":
-                lexeme += current
-                self.stream_reader.next() # Consume the "/"
-            if self.token_type_table.getTokenType(state=state) == "CLOSE_TAG" and current is None:
-                self.stream_reader.set_eof(True)
-            return Token(name=self.token_type_table.getTokenType(state=state), attribute_value=lexeme)
+            return Token(name=self.token_type_table.getTokenType(state=state), attribute_value=lexeme) # new Token(getTokenType(state), lexeme)
         else:
-            logging.debug("=============== Returning None Token ===============")
+            logging.debug("=============== Returning None ===============")
             return None
+        
 
+    
     def get_tokens(self) -> list:
         return self.tokens
 

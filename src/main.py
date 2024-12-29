@@ -19,12 +19,13 @@ def main():
     parser.parse()
     parser.print_tokens()
     tokens = parser.get_tokens()
+    print(tokens)
 
-    # Make a dom and construct it from tokens
-    dom = DOM(tokens=tokens)
-    dom.build()
-    print("Hello")
-    # dom.get_dom()
+    # # Make a dom and construct it from tokens
+    # dom = DOM(tokens=tokens)
+    # dom.build()
+    # print("Hello")
+    # # dom.get_dom()
 
 if __name__ == "__main__":
     main()
