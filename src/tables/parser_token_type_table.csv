@@ -1,0 +1,4 @@
+State,Type
+CLOSE_START_TAG,close_start_tag
+CONTENT,content
+CLOSE_END_TAG,close_end_tag

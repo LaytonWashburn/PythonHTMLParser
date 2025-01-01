@@ -34,6 +34,7 @@ class Transitiontable:
         return result.get(transition, None)
 
 
+    
 class TokenTypeTable:
     def __init__(self, file_path:str):
         self.dict = self.read_token_type_table(file_path)

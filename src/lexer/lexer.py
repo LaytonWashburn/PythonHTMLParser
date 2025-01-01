@@ -15,7 +15,7 @@ class Lexer:
         self.dom = None
     
     def add(self, token:Token):
-        logging.debug(f"Adding token to list: token_type={token.get_name()}, lexeme={token.get_attribute()}")
+        logging.debug(f"Adding token to list: token_type={token.get_token_type()}, lexeme={token.get_token_value()}")
         self.tokens.append(token)
 
 
@@ -85,7 +85,7 @@ class Lexer:
         # If an accept state return a Token with the type and lexeme or return error
         if self.token_type_table.getTokenType(state=state) is not None and state != "bad":
             logging.debug("=============== Returning Token ===============")
-            return Token(name=self.token_type_table.getTokenType(state=state), attribute_value=lexeme) # new Token(getTokenType(state), lexeme)
+            return Token(token_type=self.token_type_table.getTokenType(state=state), token_value=lexeme) # new Token(getTokenType(state), lexeme)
         else:
             logging.debug("=============== Returning None ===============")
             return None
@@ -97,7 +97,7 @@ class Lexer:
     def print_tokens(self) -> None:
         logging.debug("=============== PRINTING TOKEN INFORMATION ===============")
         for token in self.tokens:
-            logging.debug(f"Token: {token.get_name()} : {token.get_attribute()}")
+            logging.debug(f"Token: {token.get_token_type()} : {token.get_token_value()}")
 
     # Main Method for the Parser
     def scan(self):
