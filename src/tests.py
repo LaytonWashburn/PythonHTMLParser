@@ -23,7 +23,7 @@ class Test:
 
         # Test 3
         html = ""
-        with open('src/html/test2.html', 'r', encoding='utf-8') as file:
+        with open('src/html/index.html', 'r', encoding='utf-8') as file:
             html = file.read()
 
         # # Test 4
