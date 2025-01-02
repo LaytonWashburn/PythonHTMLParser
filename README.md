@@ -7,3 +7,8 @@
     + These modes are the same in this
 
 ## Limitations
+
+### To Do
++ Layout
++ Painting 
++ Compositing

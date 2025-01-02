@@ -1,5 +1,5 @@
 from lexer.tokens import Token
-from parser.node import Node
+from HTML.parser.node import Node
 from tables.tables import TokenTypeTable,Transitiontable
 import logging
 
@@ -12,8 +12,8 @@ class DOM:
         self.token_index:int = 0
         self.mode:str = None
         self.eof_tokens = False
-        self.token_type_table:TokenTypeTable = TokenTypeTable('src/tables/parser_token_type_table.csv')
-        self.transition_table:Transitiontable = Transitiontable('src/tables/parser_transition_table.csv')
+        self.token_type_table:TokenTypeTable = TokenTypeTable('src/tables/html/parser_token_type_table.csv')
+        self.transition_table:Transitiontable = Transitiontable('src/tables/html/parser_transition_table.csv')
 
     def get_next_token(self):
         if self.token_index < len(self.tokens):
@@ -31,9 +31,6 @@ class DOM:
         if len(lexeme) == 0 or lexeme is None or lexeme == "":
             return ""
         return lexeme.removesuffix(remove)
-
-    def add(self):
-        pass
 
     # Private method to iterate through the tree
     def _recurse_tree(self, node:Node, dom:str, tabs:int):
@@ -78,6 +75,9 @@ class DOM:
                     node.set_parent(self.current_node)
                     self.current_node.add_child(node=node)
                     self.current_node = node
+            # elif _type == "space":
+            #     if self.current_node.get_open_tag() is not None and self.current_node is None:
+            #         pass
             elif _type == "content":
                 if self.current_node is None:
                     raise Exception(f"Error in HTML parsing: {value} not valid html")
@@ -148,8 +148,8 @@ class DOM:
 
         # If an accept state return a Token with the type and lexeme or return error
         if self.token_type_table.getTokenType(state=state) is not None and state != "bad":
-            logging.debug(f"=============== Returning Tag : token_type={self.token_type_table.getTokenType(state=state)}, toekn_value={lexeme} ===============")
-            return Token(token_type=self.token_type_table.getTokenType(state=state), token_value=lexeme) 
+            logging.debug(f"=============== Returning Tag : token_type={self.token_type_table.getTokenType(state=state).strip()}, token_value={lexeme.strip()} ===============")
+            return Token(token_type=self.token_type_table.getTokenType(state=state).strip(), token_value=lexeme.strip()) 
         else:
             logging.debug("=============== Returning None ===============")
             return None

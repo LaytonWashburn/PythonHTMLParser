@@ -4,3 +4,4 @@ OPEN_CLOSE_TAG,open_close_tag
 CLOSE_TAG,close_tag
 STRING,string
 EQUAL,equal
+SPACE,space

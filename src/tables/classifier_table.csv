@@ -75,3 +75,9 @@ _,underscore
 !,exclamation_mark
 .,dot
 ",",comma
+#,pound
+{,open_curly_brace
+},close_curly_brace
+*,asterisk
+:,colon
+;,semi_colon

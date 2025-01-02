@@ -5,14 +5,17 @@ import logging
 
 
 class Lexer:
-    def __init__(self, html: str):
-        self.html = html.replace("\n", "")
+    def __init__(self, data: str, classifier:str, transition:str, token_type:str):
+        self.data = data.replace("\n", "")
         self.tokens = []
-        self.classifier_table = ClassifierTable('src/tables/classifier_table.csv')
-        self.transition_table = Transitiontable('src/tables/transition_table.csv')
-        self.token_type_table = TokenTypeTable('src/tables/token_type_table.csv')
-        self.stream_reader = StreamReader(self.html)
+        self.classifier_table = ClassifierTable(classifier)
+        self.transition_table = Transitiontable(transition)
+        self.token_type_table = TokenTypeTable(token_type)
+        self.stream_reader = StreamReader(data=self.data)
         self.dom = None
+
+    def get_data(self):
+        return self.data
     
     def add(self, token:Token):
         logging.debug(f"Adding token to list: token_type={token.get_token_type()}, lexeme={token.get_token_value()}")
