@@ -1,0 +1,7 @@
+State,Type
+ACCESS_SELECTOR,access_selector
+SELECTOR,selector
+COLON,colon
+DECLARATION,declaration
+START_DECLARATION_BLOCK,start_declaration_block
+END_RULE,end_rule

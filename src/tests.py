@@ -23,11 +23,12 @@ class Test:
 
         # Test 3
         html = ""
-        with open('src/html-tests/index.html', 'r', encoding='utf-8') as file:
+        with open('src/Data/html-tests/index.html', 'r', encoding='utf-8') as file:
             html = file.read()
-        css = ""
-        with open('src/css-tests/index.css', 'r', encoding='utf-8') as file:
-            css = file.read()
+
+        # css = ""
+        # with open('src/Data/css-tests/index.css', 'r', encoding='utf-8') as file:
+        #     css = file.read()
 
         # # Test 4
         # html = """<body>
@@ -59,4 +60,4 @@ class Test:
 
         # # Test 12
         # html = """ " """
-        return html, css
+        return html

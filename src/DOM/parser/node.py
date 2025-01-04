@@ -6,14 +6,18 @@ class Node:
         self.close_tag = None # >
         self.tag_name = None # example: body
         self.tag = None
-        self.attribute = {}
+        self.attributes = {}
         self.content = None
         self.styles = {}
         self.parent = None
+        self.self_closing_tag = False
         self.children = []
     
     def add_child(self, node):
         self.children.append(node)
+    
+    def get_children(self):
+        return self.children
     
     def set_parent(self, node):
         self.parent = node
@@ -21,11 +25,14 @@ class Node:
     def get_parent(self):
         return self.parent
 
-    def set_attribute(self, attribute:str):
-        self.attribute = attribute
+    def set_attribute(self, key:str, value:str):
+        self.attributes[key] = value
     
-    def get_attribute(self):
-        return self.attribute
+    def get_attributes(self):
+        return self.attributes
+    
+    def get_attribute(self, key:str):
+        return self.attributes.get(key, None)
 
     def set_tag_type(self, tag_type:str):
         self.tag_type = tag_type
@@ -56,6 +63,9 @@ class Node:
     
     def set_content(self, content:str):
         self.content = content
+
+    def get_content(self):
+        return self.content
     
     def set_styles(self, key:str, value:str):
         self.styles[key] = value
@@ -64,3 +74,12 @@ class Node:
         if self.styles.get(key) is None:
             return None
         self.styles[key]
+
+    def set_self_closing_tag_true(self):
+        self.self_closing_tag = True
+    
+    def set_self_closing_tag_false(self):
+        self.self_closing_tag = False
+    
+    def get_self_closing_tag(self):
+        return self.self_closing_tag

@@ -1,5 +1,5 @@
 from lexer.tokens import Token
-from HTML.parser.node import Node
+from DOM.parser.node import Node
 from tables.tables import TokenTypeTable,Transitiontable
 import logging
 
@@ -12,6 +12,9 @@ class DOM:
         self.token_index:int = 0
         self.mode:str = None
         self.eof_tokens = False
+        self.stylesheets = []
+        self.void_elements = {"img":True, "br":True,"hr":True,"input":True,"link":True,"meta":True,
+                              "area":True,"base":True,"col":True,"source":True,"track":True,"wbr":True}
         self.token_type_table:TokenTypeTable = TokenTypeTable('src/tables/html/parser_token_type_table.csv')
         self.transition_table:Transitiontable = Transitiontable('src/tables/html/parser_transition_table.csv')
 
@@ -34,57 +37,97 @@ class DOM:
 
     # Private method to iterate through the tree
     def _recurse_tree(self, node:Node, dom:str, tabs:int):
-        with_children = '\n'+ (('   ' * tabs) + node.get_token_value() + '\n' if node.get_token_value() != "" else "")
-        dom = dom + node.get_opening_tab() + (with_children if len(node.children) != 0 else node.get_token_value())
-        tabs += 1
-        for n in node.children:
-            dom += ('   ' * tabs)
-            dom = self._recurse_tree(node=n, dom = dom, tabs=tabs)
-        space = ('   ' * (tabs - 1)) + node.get_closing_tag() + ('\n' if node.get_parent() is not None else "") if len(node.children) != 0 else node.get_closing_tag() + ('\n' if node.get_parent() is not None else "")
-        dom = dom + space
+
+        dom += ('   ' * tabs)
+        dom += ("<" + node.get_open_tag() + " ")
+
+        for attribute in node.get_attributes().keys():
+            dom += (node.get_attribute(key=attribute) + " ")
+
+        dom += (">\n" if len(node.get_children()) else ">")
+        dom += (('   ' * tabs) + node.get_content() + "\n" if node.get_content() is not None else "")
+        for child in node.children:
+            dom = self._recurse_tree(node=child, dom = dom, tabs=(tabs+1))
+
+        dom += ('   ' * tabs)
+        dom += ("</" + node.get_open_tag() + ">\n") if not node.get_self_closing_tag() else "\n"
+
         return dom
 
     def recurse_tree(self, dom:str, tabs:int):
         return self._recurse_tree(self.root, dom=dom, tabs=tabs)
 
+    def build_dom_str(self) -> str:
+        return self.recurse_tree(dom="", tabs=0)
+        
+    
+    '''
+        Method: process_tag
+        Purpose: Process the start tag to pull the tag name and tag attributes out
+    '''
+    def process_tag(self, node:Node, value:str) -> Node:
+        
+        value_list:list = value.split() # Split on whitespace
 
-    def get_dom(self):
-        # logging.debug(self.root)
-        dom = self.recurse_tree(dom="", tabs=0)
-        #logging.debug(dom)
-        print(dom)
+        tag_name = value_list.pop(0)
+
+        if self.void_elements.get(tag_name, False): # If in the void elements change boolean on node
+            node.set_self_closing_tag_true()
+
+        node.set_open_tag(open_tag=tag_name) # The first value should be the name
+
+        attributes = [item.split('=') for item in value_list]
+        
+        for attribute in attributes:
+            try:
+                node.set_attribute(attribute[0], attribute[1])
+            except Exception as e:
+                print(f"Error occurred when setting attribute, {e}")
+
+        return node
     
     def build(self):
         logging.debug("=============== Building DOM ===============")
         while self.eof_tokens is False:
+
             token = self.next_tag()
             _type = token.get_token_type()
             value = token.get_token_value()
+
             if token is None:
                 raise Exception(f"Error in HTML parsing:")
 
             if _type == "close_start_tag":
+                value = value.strip("<>") # Think about a different way todo this
                 node = Node()
-                node.set_open_tag(open_tag=value)
+                node = self.process_tag(node=node, value=value)
+
                 if self.root is None:
-                    self.root = node
-                    self.current_node = self.root
+                    if node.get_self_closing_tag():
+                        node.set_parent(self.current_node) # Set the node's parent
+                        self.current_node.add_child(node=node) # Add node to current node's children list
+                    else:
+                        self.root = node
+                        self.current_node = self.root
+
+                elif node.get_self_closing_tag():
+                    node.set_parent(self.current_node) # Set the node's parent
+                    self.current_node.add_child(node=node) # Add node to current node's children list
                 else:
                     if self.current_node is None:
                         raise Exception(f"Error in HTML parsing: {value} not valid html")
                     node.set_parent(self.current_node)
                     self.current_node.add_child(node=node)
                     self.current_node = node
-            # elif _type == "space":
-            #     if self.current_node.get_open_tag() is not None and self.current_node is None:
-            #         pass
             elif _type == "content":
                 if self.current_node is None:
                     raise Exception(f"Error in HTML parsing: {value} not valid html")
                 self.current_node.set_content(content=value)
             elif _type == "close_end_tag":
+                
                 if self.current_node is None:
                     raise Exception(f"Error in HTML parsing: {value} not valid html")
+                value = value.replace("</", "", 1).replace(">", "",1)
                 self.current_node.set_close_tag(close_tag=value)
                 self.current_node = self.current_node.get_parent()
             else:

@@ -5,14 +5,34 @@ import logging
 
 
 class Lexer:
-    def __init__(self, data: str, classifier:str, transition:str, token_type:str):
-        self.data = data.replace("\n", "")
+    def __init__(self, classifier:str, transition:str, token_type:str, data=None, current_file_name=None):
+        self.data = data
         self.tokens = []
         self.classifier_table = ClassifierTable(classifier)
         self.transition_table = Transitiontable(transition)
         self.token_type_table = TokenTypeTable(token_type)
-        self.stream_reader = StreamReader(data=self.data)
+        self.stream_reader = None if self.data is None else StreamReader(data=self.data.replace("\n", ""))
         self.dom = None
+        self.current_file_name:str = current_file_name
+
+    def set_current_file_name(self, current_file_name:str):
+        self.current_file_name = current_file_name
+    
+    def get_current_file_name(self):
+        return self.current_file_name
+
+    def set_data(self, data:str):
+        self.data = data.replace("\n", "")
+        self.stream_reader = StreamReader(data=self.data)
+
+
+    def read_data(self, file_path:str):
+        with open(file_path, 'r', encoding='utf-8') as file:
+            self.data = file.read()
+        self.current_file_name = file_path
+        self.data = self.data.replace('\n', '')
+        self.stream_reader = StreamReader(data=self.data)
+
 
     def get_data(self):
         return self.data
