@@ -1,15 +1,16 @@
 from DOM.parser.dom import DOM
 from lexer.lexer import Lexer
 from CSSOM.parser.cssom import CSSOM
-from tests import Test
-import logging
-import multiprocessing
 from CSSOM.parser.css_nodes import (CSSStyeDeclaration, 
                                     CSSRule, 
                                     CSSRuleList, 
                                     MediaList, 
                                     CSSStyleSheet, 
                                     DocumentStyleSheet)
+from render_tree.render_tree import RenderTree
+from tests import Test
+import logging
+# import multiprocessing
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG) # Change this to INFO to not have the debug and DEBUG for debugging
@@ -20,9 +21,9 @@ def main():
     
     # Make a test Object
     test = Test()
-
-
     html = test.get_html()
+
+    #### DOM ####
 
     # Make a parser object and parse
     html_lexer = Lexer(classifier='src/tables/classifier_table.csv',
@@ -44,6 +45,8 @@ def main():
                       transition='src/tables/css/transition_table.csv',
                       token_type='src/tables/css/token_type_table.csv')
     
+    #### CSSOM ####
+
     css_lexer.read_data(file_path='src/Data/css-tests/index.css')
     css_lexer.scan()
     css_lexer.print_tokens()
@@ -55,11 +58,12 @@ def main():
     current_sheet = CSSStyleSheet(name="index.css")
     cssom.set_current_sheet(current_sheet=current_sheet)
     cssom.get_document_style_sheets().add_style_sheet(style_sheet=cssom.get_current_sheet())
-    
     cssom.build()
-    
     cssom.print_tokens()
-    # cssom.build()
+
+    #### Render Tree ####
+    render_tree = RenderTree(dom=dom, cssom=cssom)
+    render_tree.build()
 
 
 

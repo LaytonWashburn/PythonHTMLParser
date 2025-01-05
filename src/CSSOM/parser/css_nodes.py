@@ -6,6 +6,7 @@
 
 from __future__ import annotations # Must be at beginning of file
 from DOM.parser.node import Node
+import logging
 
 '''
     Class: CSSStyleDeclaration
@@ -45,6 +46,7 @@ class CSSRule:
         self.parent_rule:CSSRule = None 
         self.parent_style_sheet:CSSStyleSheet = None
         self.selector_text:str = None
+        self.access_selector = None # # (id), . (class)
         self.style:CSSStyeDeclaration = CSSStyeDeclaration() # Collection of properties and values
 
     def add_declaration(self, style_declaration:str):
@@ -85,6 +87,12 @@ class CSSRule:
 
     def get_style(self) -> CSSStyeDeclaration:
         return self.style
+    
+    def set_access_selector(self, access_selector:str):
+        self.access_selector = access_selector
+    
+    def get_access_selector(self):
+        return self.access_selector
 
 '''
     Class: CSSRuleList
@@ -95,11 +103,16 @@ class CSSRule:
 class CSSRuleList:
 
     def __init__(self):
-        self.rule_list = []
+        self.rule_list:list = []
     
     def add_rule(self, rule:CSSRule):
         self.rule_list.append(rule)
-
+    
+    def set_rule_list(self, rule_list):
+        self.rule_list = rule_list
+    
+    def get_rule_list(self) -> list:
+        return self.rule_list
 '''
     Class: MediaList
     Purpose: 
@@ -131,6 +144,7 @@ class CSSStyleSheet:
         self.rules:CSSRuleList = None # Identical to the css.rule_list
         self.title:str = None # Title of the node in the stylesheet
         self.type:str = None # Type of styles
+        self.selector_look_up:dict = {} # Look up table for O(1) search
         # self.name = name
         # self.parent = None
     
@@ -188,6 +202,20 @@ class CSSStyleSheet:
     
     def get_type(self):
         return self.type
+    
+    def set_selector_look_up(self, key:str, value:str):
+        if  key in self.selector_look_up:
+            logging.debug(f"=============== Overriding Current Selector: {key} ===============")
+            self.selector_look_up[key] = value
+        else:
+            logging.debug(f"=============== Setting Current Selector: {key} ===============")
+            self.selector_look_up[key] = value
+            
+    def get_selector_look_up(self) -> dict:
+        return self.selector_look_up
+    
+    def look_up_selector(self, selector:str) -> str | None:
+        return self.selector_look_up.get(selector, None)
 
     # def set_name(self, name:str):
     #     self.name = name
@@ -212,7 +240,7 @@ class DocumentStyleSheet:
         if DocumentStyleSheet.instance_count >= 1:
             raise Exception("Cannot create more instances of class DocumentStyleSheets")
         
-        self.css_style_sheets = [] # Container to hold all style sheets
+        self.css_style_sheets:list[CSSStyleSheet] = [] # Container to hold all style sheets
 
         DocumentStyleSheet.instance_count += 1
 
@@ -222,5 +250,5 @@ class DocumentStyleSheet:
         self.css_style_sheets.append(style_sheet)
     
     def get_style_sheets(self):
-        self.css_style_sheets
+        return self.css_style_sheets
     

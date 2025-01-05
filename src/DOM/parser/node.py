@@ -10,7 +10,9 @@ class Node:
         self.content = None
         self.styles = {}
         self.parent = None
-        self.self_closing_tag = False
+        self.self_closing_tag:bool = False
+        self.display_tag:bool = True
+        self.visibility:bool = True
         self.children = []
     
     def add_child(self, node):
@@ -83,3 +85,21 @@ class Node:
     
     def get_self_closing_tag(self):
         return self.self_closing_tag
+    
+    def set_display_tag_true(self):
+        self.display_tag = True
+    
+    def set_display_tag_false(self):
+        self.display_tag = False
+    
+    def get_display_tag(self) -> bool:
+        return self.display_tag
+    
+    def set_visibility_true(self):
+        self.visibility = True
+    
+    def set_visibility_false(self):
+        self.visibility = False
+    
+    def get_visibility(self) -> bool:
+        return self.visibility

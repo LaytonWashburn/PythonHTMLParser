@@ -9,12 +9,14 @@
 ## Limitations
 
 ### To Do
-+ CSSOM
-+ RenderTree
++ Make CSSOM more robust
++ Make RenderTree more robust
 + Layout
 + Painting 
 + Compositing
 + Refactor the CSS parsing to use grammar rather than state machine
++ Refactor cssom.py method 'get_document_styles' to account for css precedence
++ Clean up render_tree.py add_styles method, make access to methods easier to avoid chaining calls
 
 ### Resources
 

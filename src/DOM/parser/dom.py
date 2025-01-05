@@ -13,17 +13,30 @@ class DOM:
         self.mode:str = None
         self.eof_tokens = False
         self.stylesheets = []
+        self.meta_tags:dict = {}
         self.void_elements = {"img":True, "br":True,"hr":True,"input":True,"link":True,"meta":True,
                               "area":True,"base":True,"col":True,"source":True,"track":True,"wbr":True}
+        self.display_none = {"!DOCTYPE":True}
+        self.not_visible = {"meta":True,"base":True,"link":True,"script":True,"style":True,"area":True, 
+                            "colgroup":True,"col":True, "noscript":True,"head":True,"html":True,"template":True}
         self.token_type_table:TokenTypeTable = TokenTypeTable('src/tables/html/parser_token_type_table.csv')
         self.transition_table:Transitiontable = Transitiontable('src/tables/html/parser_transition_table.csv')
 
+    def get_root(self):
+        return self.root
+    
     def get_next_token(self):
         if self.token_index < len(self.tokens):
             index = self.token_index
             self.token_index += 1
             return self.tokens[index]
         return None
+    
+    def add_meta_tag(self, key:str, node:Node):
+        self.meta_tags[key] = node
+    
+    def get_meta_tags(self) -> dict:
+        return self.meta_tags
 
     def rollback(self):
         if self.token_index == 0:
@@ -71,16 +84,26 @@ class DOM:
 
         tag_name = value_list.pop(0)
 
+        node.set_tag(tag=tag_name)
+
+        if self.display_none.get(tag_name, False): # If in the list of elements to not display, change boolean flag
+            node.set_display_tag_false()
+
         if self.void_elements.get(tag_name, False): # If in the void elements change boolean on node
             node.set_self_closing_tag_true()
+        
+        if self.not_visible.get(tag_name, None):
+            node.set_visibility_false()
 
         node.set_open_tag(open_tag=tag_name) # The first value should be the name
 
+        print(value_list)
         attributes = [item.split('=') for item in value_list]
         
         for attribute in attributes:
             try:
-                node.set_attribute(attribute[0], attribute[1])
+                print(attribute)
+                node.set_attribute(attribute[0], attribute[1].strip('"'))
             except Exception as e:
                 print(f"Error occurred when setting attribute, {e}")
 
@@ -102,8 +125,14 @@ class DOM:
                 node = Node()
                 node = self.process_tag(node=node, value=value)
 
-                if self.root is None:
+                if not node.get_display_tag():
+                    node.set_tag(tag=value)
+                    node = self.process_tag(node=node, value=value)
+                    self.add_meta_tag(key=value, node=node)
+
+                elif self.root is None:
                     if node.get_self_closing_tag():
+                        node.set_tag(tag=value)
                         node.set_parent(self.current_node) # Set the node's parent
                         self.current_node.add_child(node=node) # Add node to current node's children list
                     else:
@@ -111,6 +140,7 @@ class DOM:
                         self.current_node = self.root
 
                 elif node.get_self_closing_tag():
+                    # node.set_tag(tag=value)
                     node.set_parent(self.current_node) # Set the node's parent
                     self.current_node.add_child(node=node) # Add node to current node's children list
                 else:
@@ -128,6 +158,10 @@ class DOM:
                 if self.current_node is None:
                     raise Exception(f"Error in HTML parsing: {value} not valid html")
                 value = value.replace("</", "", 1).replace(">", "",1)
+                if self.current_node.get_open_tag() != value:
+                    raise Exception(f"Invalid tags, open doesn't match closing: open:{self.current_node.get_open_tag()}, close:{value}")
+                else:
+                    self.current_node.set_tag(tag=value)
                 self.current_node.set_close_tag(close_tag=value)
                 self.current_node = self.current_node.get_parent()
             else:

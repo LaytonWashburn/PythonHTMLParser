@@ -2,8 +2,12 @@ body {
     background-color: red;
 }
 
-#div1 {
+#body {
     font-size: x-large;
+}
+
+#div1 {
+    display: flex;
 }
 
 #div2 {

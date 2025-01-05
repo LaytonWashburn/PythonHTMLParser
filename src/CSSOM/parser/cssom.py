@@ -27,6 +27,17 @@ class CSSOM:
 
     def get_document_style_sheets(self):
         return self.root
+    
+    # This method will need revision to account for css rule precedence
+    def get_document_styles(self):
+        sheets = self.root.get_style_sheets()
+        curr_dict = {}
+        # Can I do this in a more advanced way
+        for sheet in sheets:
+            curr_dict.update(sheet.get_selector_look_up())
+
+        print(f"=============== Returning dict: {curr_dict} ===============")
+        return curr_dict
 
     def set_current_sheet(self, current_sheet:CSSStyleSheet):
         self.current_sheet = current_sheet
@@ -53,10 +64,11 @@ class CSSOM:
         return self.tokens
     
     def print_tokens(self):
+        logging.debug("=============== Started Printing Tokens ===============")
         for token in self.tokens:
-            print(f"Token: {token.get_token_type()} : {token.get_token_value()}")
-    
-    
+            logging.debug(f"Token: {token.get_token_type()} : {token.get_token_value()}")
+        logging.debug("=============== Finished Printing Tokens ===============")
+
     def rollback(self):
         if self.token_index == 0:
             self.token_index = 0
@@ -94,7 +106,7 @@ class CSSOM:
                 if curr is None:
                     self.eof_tokens = True
             except Exception as e:
-                print(e)
+                logging.debug(e)
                 state = None # "error" # This might need to be none
                 curr = 0
         
@@ -129,8 +141,8 @@ class CSSOM:
                 self.rollback() 
 
         except Exception as e:
-            print("Printing error in Exception")
-            print(f"An error occurred: {e}")
+            logging.debug("Printing error in Exception")
+            logging.debug(f"An error occurred: {e}")
 
         # If an accept state return a Token with the type and lexeme or return error
         _temp = self.token_type_table.getTokenType(state=state)
@@ -157,14 +169,14 @@ class CSSOM:
                 raise Exception(f"=============== No Active Sheet Available ===============")
             else:
                 if self.current_rule_list is None:
-                    print("=============== No Current Rule List Available, Creating One ===============")
+                    logging.debug("=============== No Current Rule List Available, Creating One ===============")
                     rule_list = CSSRuleList()
                     self.set_current_rule_list(current_rule_list=rule_list)
                     self.current_sheet.set_rule_list(self.current_rule_list)
                 else:
                     pass
                 if self.current_rule is None:
-                    print("=============== No Current Rule Available, Creating One ===============")
+                    logging.debug("=============== No Current Rule Available, Creating One ===============")
                     rule = CSSRule()
                     self.set_current_rule(current_rule=rule) # Set current rule
                     self.current_rule_list.add_rule(self.current_rule) # Add current rule to rule list
@@ -175,7 +187,7 @@ class CSSOM:
 
             # Figure Out what to do with each token
             if _type == "access_selector": # Add the access to the rule
-                pass
+                self.current_rule.set_access_selector(access_selector=value)
 
             elif _type == "selector": # Set the current rule's name
                 self.current_rule.set_selector_text(selector_text=value)
@@ -190,8 +202,12 @@ class CSSOM:
                 pass
 
             elif _type == "end_rule":
-                self.current_rule = None # Set to None
+                # Set selector lookup for selector and the rule
+                _selector = "" if self.current_rule.get_access_selector() is None else self.current_rule.get_access_selector()
+                _selector += self.current_rule.get_selector_text()
+                self.current_sheet.set_selector_look_up(key=_selector, value=self.current_rule)
 
+                self.current_rule = None # Set to None
             else:
                 logging.debug("=============== No Tag Recognized ===============")
         logging.debug("=============== Finished Building the CCSOM ===============")
