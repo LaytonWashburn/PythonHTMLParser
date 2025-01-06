@@ -1,0 +1,26 @@
+body {
+    background-color: red;
+    padding-left: 25px;
+}
+
+#body {
+    font-size: x-large;
+}
+
+.div {
+    height: 500px;
+    width: 250px;
+}
+
+#div1 {
+    display: flex;
+    height: 25%;
+}
+
+#div2 {
+    font-weight: bold;
+}
+
+p {
+    background-color: rebeccapurple;
+}

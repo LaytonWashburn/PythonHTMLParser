@@ -23,7 +23,7 @@ class Test:
 
         # Test 3
         html = ""
-        with open('src/Data/html-tests/index.html', 'r', encoding='utf-8') as file:
+        with open('src/RenderEngine/Data/html-tests/index.html', 'r', encoding='utf-8') as file:
             html = file.read()
 
         # css = ""

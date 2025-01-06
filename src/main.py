@@ -1,15 +1,28 @@
-from DOM.parser.dom import DOM
-from lexer.lexer import Lexer
-from CSSOM.parser.cssom import CSSOM
-from CSSOM.parser.css_nodes import (CSSStyeDeclaration, 
-                                    CSSRule, 
-                                    CSSRuleList, 
-                                    MediaList, 
-                                    CSSStyleSheet, 
-                                    DocumentStyleSheet)
-from render_tree.render_tree import RenderTree
+"""
+    Python File: main.py
+    Purpose: Main entry point into the browser
+    Notes: 
+"""
+from RenderEngine.DOM.parser.dom import DOM
+from RenderEngine.lexer.lexer import Lexer
+from RenderEngine.CSSOM.parser.cssom import CSSOM
+from RenderEngine.CSSOM.parser.css_nodes import (CSSStyleSheet)
+from RenderEngine.render_tree.render_tree import RenderTree
+from RenderEngine.layout_engine.layout_engine import LayoutEngine
+from RenderEngine.painting.painter import Painter
 from tests import Test
 import logging
+import gc
+'''
+========== Unused Imports ==========
+CSSStyeDeclaration, 
+CSSRule, 
+CSSRuleList, 
+MediaList,  
+DocumentStyleSheet
+====================================
+'''
+
 # import multiprocessing
 
 # Configure logging
@@ -18,7 +31,7 @@ logging.basicConfig(level=logging.DEBUG) # Change this to INFO to not have the d
 
 # Main Entry Point to the Basic HTML Parser
 def main():    
-    
+    logging.debug("=============== Starting Rendering Pipeline ===============")
     # Make a test Object
     test = Test()
     html = test.get_html()
@@ -26,9 +39,9 @@ def main():
     #### DOM ####
 
     # Make a parser object and parse
-    html_lexer = Lexer(classifier='src/tables/classifier_table.csv',
-                       transition='src/tables/html/transition_table.csv',
-                       token_type='src/tables/html/token_type_table.csv',
+    html_lexer = Lexer(classifier='src/RenderEngine/tables/classifier_table.csv',
+                       transition='src/RenderEngine/tables/html/transition_table.csv',
+                       token_type='src/RenderEngine/tables/html/token_type_table.csv',
                        data=html)
 
     html_lexer.scan()
@@ -41,13 +54,13 @@ def main():
     dom_str = dom.build_dom_str() # Build DOM str
     print(dom_str) # Print the DOM str
 
-    css_lexer = Lexer(classifier='src/tables/classifier_table.csv',
-                      transition='src/tables/css/transition_table.csv',
-                      token_type='src/tables/css/token_type_table.csv')
+    css_lexer = Lexer(classifier='src/RenderEngine/tables/classifier_table.csv',
+                      transition='src/RenderEngine/tables/css/transition_table.csv',
+                      token_type='src/RenderEngine/tables/css/token_type_table.csv')
     
     #### CSSOM ####
 
-    css_lexer.read_data(file_path='src/Data/css-tests/index.css')
+    css_lexer.read_data(file_path='src/RenderEngine/Data/css-tests/index.css')
     css_lexer.scan()
     css_lexer.print_tokens()
     css_tokens=css_lexer.get_tokens()
@@ -65,7 +78,29 @@ def main():
     render_tree = RenderTree(dom=dom, cssom=cssom)
     render_tree.build()
 
+    #### Layout Engine ####
+    layout_engine = LayoutEngine()
+    layout_engine.compute_layout(render_tree.get_root())
+
+
+    #### Painter ####
+    painter = Painter()
+
+    logging.debug("=============== Finished Rendering Pipeling ===============")
 
 
 if __name__ == "__main__":
+    gc.collect() # Clean previous memory allocation
     main()
+
+"""
+    This part is for the gui
+"""
+# from BrowserUserInterface.browser_user_interface import BrowserUserInterfaceApp
+
+# def main():
+#     # Start the application
+#     app = BrowserUserInterfaceApp()
+
+# if __name__ == "__main__":
+#     main()
